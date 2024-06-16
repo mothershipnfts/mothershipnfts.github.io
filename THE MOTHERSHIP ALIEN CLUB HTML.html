@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mothership's Sol Alien Club</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Courier New, sans-serif;
+        }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            transition: opacity 1s ease, transform 1s ease;
+            opacity: 0;
+            transform-origin: center center;
+            transform: scale(1);
+        }
+        .background img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+			transition: transform 0.5s ease, background-size 0.5s ease;
+        }
+        .landscape-nav-container {
+            position: absolute;
+            bottom: 5vh; /* Using viewport height */
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw; /* Using viewport width */
+            z-index: 999;
+        }
+        .bubble.landscape-nav {
+            width: 10vw; /* Using viewport width */
+            height: 10vw;
+            border-radius: 10vw;
+            border: 0.2vw solid white;
+            background-color: rgba(255, 255, 255, 0.0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.5s ease, width 0.5s ease, height 0.5s ease, background-color 0.5s ease, opacity 0.5s ease;
+            opacity: 0;
+            text-align: center;
+            line-height: 1em;
+        }
+        .bubble.landscape-nav span {
+            opacity: 1;
+            font-size: 1.4vw; /* Using viewport width */
+            font-weight: bold;
+            color: #fff;
+            transition: opacity 0.5s ease;
+            text-align: center;
+        }
+        .bubble.landscape-nav:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .bubble.landscape-nav.mint-icon {
+            width: 12vw;
+            height: 12vw;
+            font-size: 12vw;
+            margin: 0 0vw;
+        }
+        .bubble.landscape-nav + .bubble.landscape-nav {
+            margin-left: 2vw;
+        }
+        .rotate-device {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 2.4vh; /* Using viewport height */
+            text-align: center;
+            z-index: 9999;
+            display: none;
+        }
+        .rotate-device i {
+            font-size: 4.8vh;
+            margin-right: 1vh;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1s ease;
+            opacity: 1;
+            transform-origin: center center;
+            transform: scale(1);
+        }
+        .loading-overlay img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            color: #fff;
+            overflow-y: scroll;
+            padding: 2vh; /* Using viewport height */
+            box-sizing: border-box;
+			animation-duration: 0.5s;
+            animation-timing-function: ease;
+            animation-fill-mode: forwards;
+        }
+		
+		@keyframes slideInFromLeft {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-header img {
+            width: 10vh; /* Using viewport height */
+            height: 10vh;
+        }
+        .back-arrow {
+            cursor: pointer;
+            font-size: 3vh;
+        }
+        .portrait-nav {
+            display: none;
+        }
+        .portrait-nav-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            bottom: 10vh;
+            left: 50%;
+            width: 90%;
+            transform: translate(-50%, 0);
+            z-index: 999;
+        }
+        .portrait-nav-item {
+            width: 64%;
+            margin-bottom: 2vh;
+            cursor: pointer;
+            color: white;
+            font-size: 1.8vh;
+            padding: 1vh;
+            border: 0.1vh solid white;
+            border-radius: 0.5vh;
+            transition: transform 0.5s ease, background-color 0.5s ease;
+            text-align: center;
+        }
+        .portrait-nav-item:hover {
+            transform: scale(1.1);
+			background-color: rgba(255, 255, 255, 0.1);
+        }
+        .community-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .nav-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            margin: 20px 0;
+			border-radius: 20%; /* Rounded edges */
+			background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid white; /* Thin white border */
+			width: 200px; /* Set a fixed width for all icons */
+            height: 200px; /* Set a fixed height for all icons */
+            transition: transform 0.5s ease, background-color 0.5s ease;
+        }
+        .nav-icon:hover {
+            transform: scale(1.1); /* Scale up on hover */
+			background-color: rgba(255, 255, 255, 0.4);
+        }
+        .nav-icon span {
+            font-size: 16px;
+            margin-top: 10px;
+            text-align: center;
+            color: #fff;
+			display: block; /* Added to center the text vertically */
+            line-height: 11; /* Adjust line height for vertical centering */
+        }       
+        .nav-icon img {
+            width: 120px; /* Adjust icon size if needed */
+            height: 120px;
+        }
+        .fade-in-out-text {
+            position: absolute;
+            top: 10%; /* Adjust position as needed */
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 100%;
+        }
+
+        .fade-in-out-text p {
+            font-size: 4vh; /* Adjust font size */
+            color: #fff;
+            opacity: 0;
+            animation: fade-in-out 10s linear infinite;
+        }
+
+        @keyframes fade-in-out {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+		@media (max-width: 768px) {
+            .fade-in-out-text {
+                top: 10%; /* Adjust for portrait mode */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading screen -->    
+    <div class="loading-overlay" id="loadingOverlay">
+        <img src="loadingscreen.gif" alt="Loading Animation">
+    </div>
+
+    <!-- Particle.js canvas -->
+    <div id="particles-js"></div>
+
+    <!-- Content -->
+    <div class="rotate-device" id="rotateDevice">
+        <img src="loadingscreen.gif" alt="Rotate Device Animation">
+    </div>    
+
+    <div class="light-refraction"></div>
+
+    <div class="background" id="homepage">
+        <img src="homepageimage.png" alt="Homepage Background">
+		<div class="fade-in-out-text">
+            <p>WELCOME TO THE MOTHERSHIP'S SOL ALIEN CLUB.</p>
+        </div>
+    </div>
+
+    <div class="landscape-nav-container" id="landscapeNavContainer">
+        <div class="bubble landscape-nav" onclick="navigateToPage('communityPage')"><span>COMMUNITY</span><div class="hidden-text" style="display:none">Community</div></div>
+		<div class="bubble landscape-nav mint-icon" onclick="window.location.href='https://magiceden.io/marketplace'"><span>MINT</span><div class="hidden-text" style="display:none">Mint</div></div>
+        <div class="bubble landscape-nav" onclick="navigateToPage('explorePage')"><span>EXPLORE</span><div class="hidden-text" style="display:none">Explore</div></div>
+        
+    </div>
+
+    <!-- Portrait mode navigation icons -->
+    <div class="portrait-nav" id="portraitNav">
+        <div class="background" id="portraitHomepage">
+            <img src="homepageimage.png" alt="Homepage Background">
+        </div>
+        <div class="portrait-nav-container" id="portraitNavContainer">
+            <div class="portrait-nav-item" onclick="window.location.href='https://magiceden.io/marketplace'">Mint</div>
+            <div class="portrait-nav-item" onclick="navigateToPage('communityPage')">Community</div>
+            <div class="portrait-nav-item" onclick="navigateToPage('explorePage')">Explore</div>           
+        </div>
+    </div>
+
+    <!-- Pages -->
+    <div class="page" id="communityPage">
+        <div class="page-header">
+            <div class="back-arrow" onclick="navigateToHomePage()">← Back</div>
+            <div class="page-logo"></div>
+            <img src="logo.png" alt="Logo">
+        </div>
+        <!-- Add content here -->
+        <div class="community-links">
+            <div class="nav-icon discord" onclick="window.location.href='https://discord.gg/CSH5bGcVP9'"><span>Join DISCORD</span></div>
+            <div class="nav-icon twitter" onclick="window.location.href='https://x.com/MOTHERSHIP_NFTs'"><span>Follow on X</span></div>
+            <div class="nav-icon Telegram" onclick="window.location.href='https://web.telegram.org/a/#-1002171842813'"><span>Join Telegram</span></div>
+        </div>
+    </div>
+    <div class="page" id="explorePage">
+    <div class="page-header">		    
+        <div class="back-arrow" onclick="navigateToHomePage()">← Back</div>
+        <div class="page-logo">Explore Page</div>
+        <img src="logo.png" alt="Logo">			
+    </div>
+    <!-- Navigation icons -->
+    <div class="community-links">
+	    <div class="nav-icon all-nfts" onclick="navigateToAllNFTs()"><span>Explore Collection</span></div>
+        <div class="nav-icon magic-eden" onclick="navigateToMagicEden()"><span>Magic Eden</span></div>        
+    </div>
+    <!-- Add content specific to the Explore page -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const loadingOverlay = document.getElementById("loadingOverlay");
+            const homepage = document.getElementById("homepage");
+            const portraitHomepage = document.getElementById("portraitHomepage");
+            const bubbles = document.querySelectorAll(".bubble");
+
+            loadingOverlay.style.display = "flex";
+
+            setTimeout(() => {
+                loadingOverlay.style.opacity = "0";
+                homepage.style.opacity = "1";
+                portraitHomepage.style.opacity = "1";
+                bubbles.forEach(bubble => bubble.style.opacity = "1");
+                homepage.style.transform = "scale(1.1)";
+                
+                setTimeout(() => {
+                    loadingOverlay.style.display = "none";
+                }, 1000);
+            }, 2000);
+        });
+
+        function navigateToPage(pageId) {
+            const homepage = document.getElementById("homepage");
+            const portraitHomepage = document.getElementById("portraitHomepage");
+            const page = document.getElementById(pageId);
+            const landscapeNavContainer = document.getElementById("landscapeNavContainer");
+            const portraitNavContainer = document.getElementById("portraitNavContainer");
+
+            homepage.style.display = "none";
+            portraitHomepage.style.display = "none";
+            landscapeNavContainer.style.display = "none";
+            portraitNavContainer.style.display = "none";
+
+            page.style.display = "block";
+            page.classList.add("slide-in-from-left"); // Add class for left slide
+            setTimeout(() => {
+                page.style.opacity = "1";
+            }, 10);
+        }
+
+        function navigateToHomePage() {
+            const homepage = document.getElementById("homepage");
+            const portraitHomepage = document.getElementById("portraitHomepage");
+            const pages = document.querySelectorAll(".page");
+            const landscapeNavContainer = document.getElementById("landscapeNavContainer");
+            const portraitNavContainer = document.getElementById("portraitNavContainer");
+
+            pages.forEach(page => {
+                page.style.opacity = "0";
+                setTimeout(() => {
+                    page.style.display = "none";
+                }, 500);
+            });
+
+            homepage.style.display = "block";
+            portraitHomepage.style.display = "block";
+            landscapeNavContainer.style.display = "flex";
+            portraitNavContainer.style.display = "flex";
+            
+            setTimeout(() => {
+                homepage.style.opacity = "1";
+                portraitHomepage.style.opacity = "1";
+            }, 10);
+        }
+
+        function updateLayout() {
+            const landscapeLayout = document.querySelector('.background');
+            const portraitLayout = document.querySelector('.portrait-nav');
+            const portraitHomepage = document.getElementById("portraitHomepage");
+            const landscapeNavIcons = document.querySelectorAll('.landscape-nav');
+
+            if (window.innerWidth < window.innerHeight) {
+                landscapeLayout.style.display = 'none';
+                landscapeNavIcons.forEach(icon => icon.style.display = 'none');
+                portraitLayout.style.display = 'flex';
+                portraitHomepage.style.display = 'block';
+            } else {
+                landscapeLayout.style.display = 'block';
+                landscapeNavIcons.forEach(icon => icon.style.display = 'flex');
+                portraitLayout.style.display = 'none';
+                portraitHomepage.style.display = 'none';
+            }
+        }
+        
+		function navigateToDiscord() {
+            window.location.href = "https://discord.gg/your-discord-link";
+        }
+
+        function navigateToTwitter() {
+            window.location.href = "https://twitter.com/your-twitter-handle";
+        }
+
+        function navigateToMagicEden() {
+            window.location.href = "https://magiceden.io/community";
+        }
+		
+		function navigateToMagicEden() {
+            window.location.href = "https://magiceden.io/marketplace";
+        }
+
+        function navigateToAllNFTs() {
+            // Implement navigation logic for all NFTs page
+            alert("Navigate to all NFTs page logic here.");
+        }
+        window.addEventListener('resize', updateLayout);
+        updateLayout();
+
+        // Particle.js configuration
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    },
+                    "image": {
+                        "src": "img/github.svg",
+                        "width": 100,
+                        "height": 100
+                    }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false,
+                    "anim": {
+                        "enable": false,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 0.8,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                        "speed": 20,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": false,
+                    "distance": 300,
+                    "color": "#ffffff",
+                    "opacity": 0.1,
+                    "width": 0.1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 0.2,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "repulse"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 400,
+                        "line_linked": {
+                            "opacity": 1
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 200,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+    </script>
+</body>
+</html>
+
+
