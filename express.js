@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch'); // For making HTTP requests
 const { Connection, clusterApiUrl } = require('@solana/web3.js');
+require('dotenv').config(); // Load environment variables
 
 // Initialize Express app
 const app = express();
@@ -28,21 +29,36 @@ app.post('/connect-wallet', async (req, res) => {
         const twitterResponse = await fetch(`https://api.twitter.com/2/users/by/username/${twitterUsername}`, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer AAAAAAAAAAAAAAAAAAAAAAKsuQEAAAAA01ZlIp7skgCd%2Boj48AZOcIpn4Ec%3DA5xyFNRGMOdXD74idY87mnstDYc3drVjUXOyzXhqVIO5DcOgNV`,
+                Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
             },
         });
         const twitterData = await twitterResponse.json();
 
-        // Check if the user is following on Twitter
+        // Check if the user exists on Twitter
         if (!twitterData.data) {
-            return res.status(400).json({ error: 'User is not following on Twitter' });
+            return res.status(400).json({ error: 'Twitter user not found' });
+        }
+
+        // Check if the user follows a specific Twitter account (if needed)
+        const userId = twitterData.data.id;
+        const followCheckResponse = await fetch(`https://api.twitter.com/2/users/${userId}/following`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+            },
+        });
+        const followCheckData = await followCheckResponse.json();
+        const isFollowing = followCheckData.data.some(follow => follow.username === 'YourAccountToCheck');
+
+        if (!isFollowing) {
+            return res.status(400).json({ error: 'User is not following the specified Twitter account' });
         }
 
         // Check Discord membership
-        const discordResponse = await fetch(`https://discord.com/api/v9/guilds/1242245658124222484/members/${discordUserId}`, {
+        const discordResponse = await fetch(`https://discord.com/api/v9/guilds/${process.env.DISCORD_SERVER_ID}/members/${discordUserId}`, {
             method: 'GET',
             headers: {
-                Authorization: `Bot MTI1MzU2NTE1NTgwODEyMDkyNQ.GyqZ0Q.RCGohYUUDmA73Gnd6Hirnm4aRxOcjjOcB7MNCw`,
+                Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
             },
         });
         const discordData = await discordResponse.json();
@@ -66,4 +82,3 @@ app.post('/connect-wallet', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
-
