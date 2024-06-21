@@ -28,7 +28,7 @@ app.post('/connect-wallet', async (req, res) => {
         const twitterResponse = await fetch(`https://api.twitter.com/2/users/by/username/${twitterUsername}`, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer YOUR_TWITTER_BEARER_TOKEN`,
+                Authorization: `Bearer AAAAAAAAAAAAAAAAAAAAAAKsuQEAAAAA01ZlIp7skgCd%2Boj48AZOcIpn4Ec%3DA5xyFNRGMOdXD74idY87mnstDYc3drVjUXOyzXhqVIO5DcOgNV`,
             },
         });
         const twitterData = await twitterResponse.json();
@@ -39,10 +39,10 @@ app.post('/connect-wallet', async (req, res) => {
         }
 
         // Check Discord membership
-        const discordResponse = await fetch(`https://discord.com/api/v9/guilds/YOUR_DISCORD_SERVER_ID/members/${discordUserId}`, {
+        const discordResponse = await fetch(`https://discord.com/api/v9/guilds/1242245658124222484/members/${discordUserId}`, {
             method: 'GET',
             headers: {
-                Authorization: `Bot YOUR_DISCORD_BOT_TOKEN`,
+                Authorization: `Bot MTI1MzU2NTE1NTgwODEyMDkyNQ.GyqZ0Q.RCGohYUUDmA73Gnd6Hirnm4aRxOcjjOcB7MNCw`,
             },
         });
         const discordData = await discordResponse.json();
@@ -66,3 +66,4 @@ app.post('/connect-wallet', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
