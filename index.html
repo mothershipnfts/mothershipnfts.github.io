@@ -575,9 +575,11 @@
                     const response = await window.solana.connect();
                     const walletAddress = response.publicKey.toString();
                     
-                    // Display connected wallet address
-                    document.getElementById('wallet-address').textContent = `Connected Wallet: ${walletAddress}`;
-                    
+                   // Change button appearance to indicate connection
+                    const connectButton = document.getElementById('connect-wallet');
+                    connectButton.textContent = 'CONNECTED!';
+                    connectButton.style.backgroundColor = 'green';
+			
                     // Send wallet address, Twitter username, and Discord user ID to backend
                     addToWhitelist(walletAddress, 'twitterUsername', 'discordUserId');
                 } catch (err) {
