@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mothership's Solana Alien Club</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/solana-web3.js/1.30.2/solana-web3.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <style>
         body, html {
             margin: 0;
@@ -273,6 +275,9 @@
     <div class="loading-overlay" id="loadingOverlay">
         <img src="loadingscreen.gif" alt="Loading Animation">
     </div>
+	
+	<button id="connect-wallet">Connect Wallet</button>
+    <p id="wallet-address"></p>
 
     <!-- Particle.js canvas -->
     <div id="particles-js"></div>
@@ -337,15 +342,15 @@
     </div>
     <!-- Add content specific to the Explore page -->
     </div>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const loadingOverlay = document.getElementById("loadingOverlay");
             const homepage = document.getElementById("homepage");
             const portraitHomepage = document.getElementById("portraitHomepage");
             const bubbles = document.querySelectorAll(".bubble");
-
+            const connectButton = document.getElementById('connect-wallet');
+            const walletAddressElement = document.getElementById('wallet-address');
             loadingOverlay.style.display = "flex";
 
             setTimeout(() => {
@@ -422,8 +427,8 @@
                 portraitLayout.style.display = 'none';
                 portraitHomepage.style.display = 'none';
             }
-        }
-        
+        }        		
+		
 		function navigateToDiscord() {
             window.location.href = "https://discord.gg/your-discord-link";
         }
@@ -558,8 +563,49 @@
             },
             "retina_detect": true
         });
+		
+		document.getElementById('connect-wallet').addEventListener('click', async () => {
+            // Check if the Phantom wallet is installed
+            if (window.solana && window.solana.isPhantom) {
+                try {
+                    // Connect to the wallet
+                    const response = await window.solana.connect();
+                    const walletAddress = response.publicKey.toString();
+                    
+                    // Display connected wallet address
+                    document.getElementById('wallet-address').textContent = `Connected Wallet: ${walletAddress}`;
+                    
+                    // Send wallet address, Twitter username, and Discord user ID to backend
+                    addToWhitelist(walletAddress, 'twitterUsername', 'discordUserId');
+                } catch (err) {
+                    console.error('Error connecting to wallet:', err);
+                }
+            } else {
+                alert('Please install Phantom wallet');
+            }
+        });
+
+        // Function to send wallet address, Twitter username, and Discord user ID to backend
+        async function addToWhitelist(walletAddress, twitterUsername, discordUserId) {
+            try {
+                const response = await fetch('/connect-wallet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ walletAddress, twitterUsername, discordUserId }),
+                });
+
+                if (response.ok) {
+                    console.log('Wallet address added to whitelist');
+                } else {
+                    console.error('Failed to add wallet address to whitelist');
+                }
+            } catch (err) {
+                console.error('Error adding to whitelist:', err);
+            }
+        }
     </script>
 </body>
 </html>
-
 
