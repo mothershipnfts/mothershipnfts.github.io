@@ -15,6 +15,9 @@ app.use(bodyParser.json());
 // Solana network connection
 const connection = new Connection(clusterApiUrl('devnet'));
 
+// Array to store whitelist information
+const whitelist = [];
+
 // Route to handle wallet connection and whitelist addition
 app.post('/connect-wallet', async (req, res) => {
     try {
@@ -68,14 +71,25 @@ app.post('/connect-wallet', async (req, res) => {
             return res.status(400).json({ error: 'User is not a member of the Discord server' });
         }
 
-        // If all checks pass, add the wallet address to the whitelist
-        // Your Solana whitelist management logic here
+        // If all checks pass, add the wallet address and other info to the whitelist
+        const whitelistEntry = {
+            walletAddress,
+            twitterUsername,
+            discordUserId,
+            timestamp: new Date().toISOString()
+        };
+        whitelist.push(whitelistEntry);
 
         res.status(200).json({ message: 'Wallet connected and added to whitelist successfully' });
     } catch (error) {
         console.error('Error connecting wallet:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
+});
+
+// Route to retrieve the whitelist
+app.get('/whitelist', (req, res) => {
+    res.status(200).json(whitelist);
 });
 
 // Start the server
