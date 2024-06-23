@@ -601,6 +601,9 @@
                 } catch (err) {
                     console.error('Error connecting to wallet:', err);
                 }
+	    } else if (/Mobi|Android/i.test(navigator.userAgent)) {
+                // If mobile device detected, use Phantom Wallet deep link
+                window.open('https://phantom.app/ul/browse/https://YOUR_WEBSITE_URL', '_blank');
             } else {
                 alert('Please install Phantom wallet');
             }
