@@ -391,6 +391,7 @@
             const page = document.getElementById(pageId);
             const landscapeNavContainer = document.getElementById("landscapeNavContainer");
             const portraitNavContainer = document.getElementById("portraitNavContainer");
+            const connectWalletButton = document.getElementById('connect-wallet');
 
             homepage.style.display = "none";
             portraitHomepage.style.display = "none";
@@ -402,6 +403,12 @@
             setTimeout(() => {
                 page.style.opacity = "1";
             }, 10);
+	    // Check if the page is Community or Explore, and hide Connect Wallet button
+            if (pageId === 'communityPage' || pageId === 'explorePage') {
+                connectWalletButton.style.display = 'none';
+            } else {
+                connectWalletButton.style.display = 'block';
+            }
         }
 
         function navigateToHomePage() {
@@ -410,7 +417,8 @@
             const pages = document.querySelectorAll(".page");
             const landscapeNavContainer = document.getElementById("landscapeNavContainer");
             const portraitNavContainer = document.getElementById("portraitNavContainer");
-
+            const connectWalletButton = document.getElementById('connect-wallet');
+		
             pages.forEach(page => {
                 page.style.opacity = "0";
                 setTimeout(() => {
@@ -422,7 +430,8 @@
             portraitHomepage.style.display = "block";
             landscapeNavContainer.style.display = "flex";
             portraitNavContainer.style.display = "flex";
-            
+            connectWalletButton.style.display = 'block';
+		
             setTimeout(() => {
                 homepage.style.opacity = "1";
                 portraitHomepage.style.opacity = "1";
