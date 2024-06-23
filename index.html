@@ -588,7 +588,7 @@
             if (window.solana && window.solana.isPhantom) {
                 try {
                     // Connect to the wallet
-                    const response = await window.solana.connect();
+                    const response = await window.solana.connect({ onlyIfTrusted: false });
                     const walletAddress = response.publicKey.toString();
                     
                    // Change button appearance to indicate connection
